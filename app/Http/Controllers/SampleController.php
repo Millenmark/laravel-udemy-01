@@ -43,13 +43,9 @@ class SampleController extends Controller
 
         // dd($test);
         // dd($request->all());
-        $request->validate([
-            'avatar' => 'required|mimes:png,jpg,jpeg|max:5048',
-            'name' => 'required|string|max:255'
-        ]);
 
         $newImageName = time() . '-' . $request->name . '.' . $request->avatar->extension();
-        $request->avatar->move(resource_path('avatars'), $newImageName);
+        $request->avatar->move(public_path('avatars'), $newImageName);
         // dd($newImageName);
         // dd($test);
 
@@ -57,6 +53,8 @@ class SampleController extends Controller
             'name' => $request->name,
             'avatar' => $newImageName,
         ]);
+
+        return response()->json(['avatar' => $newImageName], 201);
     }
 
     /**
