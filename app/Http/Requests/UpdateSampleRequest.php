@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Contracts\Validation\Validator;
 
 class UpdateSampleRequest extends FormRequest
 {
@@ -24,7 +26,23 @@ class UpdateSampleRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'avatar' => 'sometimes|image|mimes:png,jpg,jpeg|max:5048',
+            'name' => 'sometimes|string|max:255'
         ];
+    }
+
+    /**
+     * Handle a failed validation attempt.
+     *
+     * @param  \Illuminate\Contracts\Validation\Validator  $validator
+     * @return void
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json([
+            'message' => $validator->errors()->first(),
+        ], 422));
     }
 }
