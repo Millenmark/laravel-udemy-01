@@ -19,4 +19,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 // Sample Routes
-Route::post('/sample', 'SampleController@store')->name('sample');
+Route::post('/samples', 'SampleController@store')->name('sample');
+Route::post('/samples/{sample}', 'SampleController@update')->name('sample-update');
+Route::delete('/samples/{sample}', 'SampleController@destroy')->name('sample-destroy');
