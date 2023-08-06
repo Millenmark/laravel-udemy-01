@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Sample;
 use App\Http\Requests\StoreSampleRequest;
 use App\Http\Requests\UpdateSampleRequest;
+use Illuminate\Support\Facades\File;
+use Illuminate\Http\Request;
 
 class SampleController extends Controller
 {
@@ -44,7 +46,7 @@ class SampleController extends Controller
         // dd($test);
         // dd($request->all());
 
-        $newImageName = time() . '-' . $request->name . '.' . $request->avatar->extension();
+        $newImageName = time() . '.' . $request->avatar->extension();
         $request->avatar->move(public_path('avatars'), $newImageName);
         // dd($newImageName);
         // dd($test);
@@ -77,7 +79,22 @@ class SampleController extends Controller
      */
     public function update(UpdateSampleRequest $request, Sample $sample)
     {
-        //
+
+        if ($request->hasFile('avatar')) {
+            // Remove old avatar
+            unlink(public_path('avatars/' . $sample->avatar));
+
+            // Store new avatar
+            $newImageName = time() . '.' . $request->avatar->extension();
+            $request->avatar->move(public_path('avatars'), $newImageName);
+        }
+
+        $sample->fill([
+            'avatar' => $newImageName ?? $sample->avatar,
+            'name' => $request->name,
+        ])->save();
+
+        return response()->json(['success' => 'Sample updated successfully']);
     }
 
     /**
@@ -88,6 +105,15 @@ class SampleController extends Controller
      */
     public function destroy(Sample $sample)
     {
-        //
+        if ($sample->avatar) {
+            $avatarPath = public_path('avatars/' . $sample->avatar);
+            if (file_exists($avatarPath)) {
+                unlink($avatarPath);
+            }
+        }
+
+        $sample->delete();
+
+        return response()->json(['success' => 'Sample deleted successfully']);
     }
 }
